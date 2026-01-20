@@ -14,21 +14,21 @@ app.use(express.static(path.join(__dirname)));
 
 // 密钥存储，区分管理员和普通用户
 const SECRET_KEYS = [
-    { key: 'shushu6688787878@@!!', type: 'admin' },
-    { key: 'Hsy20080618SkywalkerStan', type: 'user' },
-    { key: 'mk149478', type: 'user' },
-    { key: 'Mark%d', type: 'user' },
-    { key: '240412', type: 'user' },
-    { key: 'password', type: 'user' },
-    { key: 'MSM51ka', type: 'user' },
-    { key: 'LightMist5220', type: 'user' },
-    { key: 'sh3712', type: 'user' },
-    { key: '2026927071', type: 'user' },
-    { key: '14565378613701161', type: 'user' },
-    { key: '998244353', type: 'user' },
-    { key: 'azureseeker666', type: 'user' },
-    { key: 'zhz_4wiel2', type: 'user' },
-    { key: 'Wanderer', type: 'user' }
+    { key: 'admin001', type: 'admin' },
+    { key: 'key001', type: 'user' },
+    { key: 'key002', type: 'user' },
+    { key: 'key003', type: 'user' },
+    { key: 'key004', type: 'user' },
+    { key: 'key005', type: 'user' },
+    { key: 'key006', type: 'user' },
+    { key: 'key007', type: 'user' },
+    { key: 'key008', type: 'user' },
+    { key: 'key009', type: 'user' },
+    { key: 'key010', type: 'user' },
+    { key: 'key011', type: 'user' },
+    { key: 'key012', type: 'user' },
+    { key: 'key013', type: 'user' },
+    { key: 'key014', type: 'user' }
 ];
 
 const sessions = new Map();
