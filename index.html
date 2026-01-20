@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>腾讯视频链接生成器 - by老鼠鼠66</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #66a1c2;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #343a40;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.16);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e9ecef, #ced4da, #adb5bd);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .container:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: calc(var(--border-radius) - 2px);
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        h1 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: var(--light-gray);
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15);
+            background-color: white;
+        }
+        
+        .example {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        button:hover::after {
+            left: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .result {
+            margin-top: 25px;
+            display: none;
+        }
+        
+        .result-title {
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+        
+        .result-box {
+            background-color: var(--light-gray);
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+        
+        .result-box:hover {
+            background-color: white;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .error {
+            color: #6d28d9;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #f3e8ff;
+            border: 1px solid #e9d5ff;
+            border-radius: var(--border-radius);
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .error.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .success {
+            color: var(--secondary-color);
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: var(--border-radius);
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .success.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-buttons button, 
+        .action-buttons a {
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .action-buttons button::after, 
+        .action-buttons a::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        .action-buttons button:hover::after, 
+        .action-buttons a:hover::after {
+            left: 100%;
+        }
+        
+        /* 统一功能按钮样式 */
+        .function-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .function-buttons .back-btn {
+            min-width: 120px;
+            text-align: center;
+            padding: 10px 20px;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .jump-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .jump-btn.disabled {
+            background: var(--medium-gray);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid var(--medium-gray);
+        }
+        
+        .info-panel {
+            background-color: var(--light-gray);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .info-panel h3 {
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .info-panel p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        
+        .info-panel p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .video-id-selector {
+            margin-bottom: 20px;
+        }
+        
+        .selector-title {
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--medium-gray);
+            margin-bottom: 25px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            margin-right: 5px;
+            transition: var(--transition);
+            font-size: 16px;
+            color: var(--text-secondary);
+            background-color: var(--light-gray);
+        }
+        
+        .tab:hover {
+            background-color: var(--medium-gray);
+            color: var(--text-primary);
+        }
+        
+        .tab.active {
+            border-color: var(--medium-gray);
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            background-color: white;
+            font-weight: 500;
+            color: var(--secondary-color);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .category {
+            margin-bottom: 12px;
+        }
+        
+        .category-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .category-btn .arrow {
+            transition: var(--transition);
+            font-size: 14px;
+        }
+        
+        .category-btn.expanded .arrow {
+            transform: rotate(90deg);
+        }
+        
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 8px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 0 15px;
+        }
+        
+        .category-content.expanded {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .author {
+            margin: 10px 0;
+            padding-left: 5px;
+        }
+        
+        .author-btn {
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .author-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .author-btn .arrow {
+            transition: var(--transition);
+            font-size: 12px;
+        }
+        
+        .author-btn.expanded .arrow {
+            transform: rotate(90deg);
+        }
+        
+        .author-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 8px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 0 15px;
+        }
+        
+        .author-content.expanded {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .video-id-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+            padding-left: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .video-id-btn {
+            background: linear-gradient(135deg, var(--light-gray), white);
+            color: var(--secondary-color);
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            min-width: 100px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .video-id-btn:hover {
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .video-id-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-1px);
+        }
+        
+        .json-data-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .json-data-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            background-color: var(--light-gray);
+            display: inline-block;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .json-data-link a:hover {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 25px;
+            font-style: italic;
+            font-size: 15px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            margin: 10px 0;
+        }
+        
+        #videoDataContainer {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            background-color: white;
+            box-shadow: var(--shadow-light);
+        }
+        
+        #videoDataContainer::-webkit-scrollbar,
+        .result-box::-webkit-scrollbar,
+        .video-id-list::-webkit-scrollbar,
+        .category-content::-webkit-scrollbar,
+        .author-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #videoDataContainer::-webkit-scrollbar-track,
+        .result-box::-webkit-scrollbar-track,
+        .video-id-list::-webkit-scrollbar-track,
+        .category-content::-webkit-scrollbar-track,
+        .author-content::-webkit-scrollbar-track {
+            background: var(--light-gray);
+            border-radius: 4px;
+        }
+        
+        #videoDataContainer::-webkit-scrollbar-thumb,
+        .result-box::-webkit-scrollbar-thumb,
+        .video-id-list::-webkit-scrollbar-thumb,
+        .category-content::-webkit-scrollbar-thumb,
+        .author-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary-color), var(--secondary-color));
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        
+        #videoDataContainer::-webkit-scrollbar-thumb:hover,
+        .result-box::-webkit-scrollbar-thumb:hover,
+        .video-id-list::-webkit-scrollbar-thumb:hover,
+        .category-content::-webkit-scrollbar-thumb:hover,
+        .author-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(var(--secondary-color), var(--accent-color));
+            transform: scaleX(1.1);
+        }
+        
+        /* 高级感细节优化 */
+        .container {
+            background: linear-gradient(145deg, #ffffff, #f5f7fa);
+            border: none;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.05),
+                0 1px 3px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 输入框聚焦时的高级动画效果 */
+        input[type="text"] {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            box-shadow: 
+                inset 0 1px 3px rgba(0,0,0,0.05),
+                0 1px 0 rgba(255,255,255,0.9);
+        }
+        
+        input[type="text"]:focus {
+            box-shadow: 
+                inset 0 1px 3px rgba(74, 111, 165, 0.1),
+                0 0 0 3px rgba(74, 111, 165, 0.15);
+            border-color: var(--primary-color);
+            animation: focusPulse 0.5s ease-in-out;
+        }
+        
+        @keyframes focusPulse {
+            0%, 100% { box-shadow: inset 0 1px 3px rgba(74, 111, 165, 0.1), 0 0 0 3px rgba(74, 111, 165, 0.15); }
+            50% { box-shadow: inset 0 1px 3px rgba(74, 111, 165, 0.1), 0 0 0 5px rgba(74, 111, 165, 0.1); }
+        }
+        
+        /* 按钮高级效果 */
+        button {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            border: none;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+            z-index: -1;
+        }
+        
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* 结果框高级样式 */
+        .result-box {
+            position: relative;
+            background: linear-gradient(145deg, #f8f9fa, #ffffff);
+            border: 1px solid var(--medium-gray);
+            box-shadow: 
+                inset 0 1px 3px rgba(0,0,0,0.05),
+                0 1px 0 rgba(255,255,255,0.9);
+        }
+        
+        /* 美化消息提示 */
+        .success, .error {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .success::before, .error::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: slideShine 2s infinite;
+        }
+        
+        @keyframes slideShine {
+            0% { left: -100%; }
+            20%, 100% { left: 100%; }
+        }
+        
+        /* 优化标签样式 */
+        .tab.active {
+            background: linear-gradient(145deg, #ffffff, #f5f7fa);
+            box-shadow: 
+                0 1px 3px rgba(0,0,0,0.1),
+                0 1px 0 rgba(255,255,255,0.9);
+            border-color: var(--medium-gray);
+        }
+        
+        /* 高级感排版优化 */
+        h1 {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+            font-weight: 700;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            border-radius: 3px;
+        }
+        
+        .subtitle {
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            opacity: 0.85;
+        }
+        
+        /* 高级阴影效果 */
+        .action-buttons button, 
+        .action-buttons a,
+        .copy-btn,
+        .jump-btn,
+        .author-btn,
+        .category-btn {
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .action-buttons button::after, 
+        .action-buttons a::after,
+        .copy-btn::after,
+        .jump-btn::after,
+        .author-btn::after,
+        .category-btn::after {
+            content: '';
+            position: absolute;
+            z-index: -1;
+            bottom: -2px;
+            left: 5%;
+            right: 5%;
+            height: 5px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+            border-radius: 50%;
+            filter: blur(2px);
+            transition: all 0.3s ease;
+        }
+        
+        .action-buttons button:hover::after, 
+        .action-buttons a:hover::after,
+        .copy-btn:hover::after,
+        .jump-btn:hover::after,
+        .author-btn:hover::after,
+        .category-btn:hover::after {
+            bottom: -3px;
+            left: 10%;
+            right: 10%;
+            opacity: 0.8;
+            transform: scaleX(1.1);
+        }
+        
+        /* 按钮点击微交互 */
+        button:active {
+            transform: translateY(1px);
+            transition: transform 0.1s ease;
+        }
+        
+        button:active::after {
+            bottom: -1px;
+            opacity: 0.6;
+        }
+        
+        /* 视频ID按钮高级样式 */
+        .video-id-btn {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--accent-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .video-id-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+            z-index: 1;
+        }
+        
+        .video-id-btn:hover::before {
+            left: 100%;
+        }
+        
+        .video-id-btn.active {
+            box-shadow: 
+                0 4px 12px rgba(74, 111, 165, 0.3),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: var(--primary-color);
+        }
+        
+        /* 信息面板高级样式 */
+        .info-panel {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            border-left: none;
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            box-shadow: 
+                0 5px 15px rgba(0,0,0,0.05),
+                0 1px 0 rgba(255,255,255,0.8);
+        }
+        
+        .info-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+        }
+        
+        /* 结果框高级动画 */
+        .result {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .result.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+        
+        /* 加载状态优化 */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: white;
+            width: 18px;
+            height: 18px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 高级响应式调整 */
+        @media (max-width: 768px) {
+            .container {
+                background: white;
+                box-shadow: 
+                    0 5px 15px rgba(0,0,0,0.03),
+                    0 1px 3px rgba(0,0,0,0.05);
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .tab {
+                padding: 10px 20px;
+                display: inline-block;
+            }
+        }
+        
+        #videoDataContainer::-webkit-scrollbar-thumb:hover,
+        .result-box::-webkit-scrollbar-thumb:hover,
+        .video-id-list::-webkit-scrollbar-thumb:hover,
+        .category-content::-webkit-scrollbar-thumb:hover,
+        .author-content::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+        
+        .loading-indicator {
+            text-align: center;
+            padding: 25px;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 15px;
+        }
+        
+        /* 加载动画 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 微交互效果 */
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .animate-on-load {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        .animate-on-click {
+            transition: transform 0.1s ease;
+        }
+        
+        .animate-on-click:active {
+            transform: scale(0.95);
+        }
+        
+        /* 加载指示器动画 */
+        .loading-dots {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 0 4px;
+            animation: pulse 1.4s infinite ease-in-out;
+        }
+        
+        .loading-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        /* 结果出现动画 */
+        .result.show {
+            display: block;
+            animation: scaleIn 0.3s ease-out;
+        }
+        
+        /* 错误和成功消息动画 */
+        .error.show, .success.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* 输入框聚焦动画 */
+        @keyframes focusPulse {
+            0% { box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15); }
+            50% { box-shadow: 0 0 0 6px rgba(74, 111, 165, 0.1); }
+            100% { box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15); }
+        }
+        
+        input[type="text"]:focus {
+            animation: focusPulse 2s infinite;
+        }
+        
+        /* 滚动条动画 */
+        ::-webkit-scrollbar-thumb {
+            transition: background 0.3s ease;
+        }
+        
+        /* 响应式设计 - 额外优化 */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 90vw;
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                font-size: 16px; /* 防止iOS缩放 */
+                -webkit-text-size-adjust: 100%;
+            }
+            
+            .container {
+                padding: 25px;
+                border-radius: calc(var(--border-radius) + 2px);
+            }
+            
+            h1 {
+                font-size: 24px;
+                letter-spacing: -0.3px;
+            }
+            
+            .subtitle {
+                font-size: 14px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                margin-bottom: 8px;
+                border-radius: var(--border-radius);
+                text-align: center;
+                padding: 14px 20px; /* 增加触摸区域 */
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            /* 增加移动设备上的按钮触摸区域 */
+            button, .tab, .video-id-btn {
+                min-height: 44px;
+                line-height: 44px;
+                touch-action: manipulation; /* 防止双击缩放 */
+            }
+            
+            .category-content.expanded {
+                max-height: 400px;
+            }
+            
+            .author-content.expanded {
+                max-height: 250px;
+            }
+            
+            .video-id-list {
+                max-height: 150px;
+                gap: 6px;
+                padding: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                min-height: 100vh;
+                height: auto;
+            }
+            
+            .container {
+                padding: 20px 15px;
+                border-radius: var(--border-radius);
+            }
+            
+            h1 {
+                font-size: 22px;
+                line-height: 1.3;
+            }
+            
+            .category-btn, .author-btn {
+                padding: 12px 10px;
+                font-size: 15px;
+                width: 100%;
+            }
+            
+            .video-id-btn {
+                padding: 10px 12px;
+                font-size: 13px;
+                min-width: 85px;
+                flex: 1;
+                min-width: 0;
+            }
+            
+            .result-box {
+                font-size: 14px;
+                padding: 12px;
+                word-break: break-word;
+            }
+            
+            .info-panel {
+                padding: 12px;
+            }
+            
+            .info-panel p {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .container {
+                padding: 15px 12px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .video-id-list {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .video-id-btn {
+                min-width: auto;
+            }
+        }
+        
+        /* 高对比度模式支持 */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary-color: #0f4c81;
+                --secondary-color: #0c5a8a;
+                --text-primary: #000000;
+                --text-secondary: #1a1a1a;
+                --medium-gray: #b3b3b3;
+            }
+        }
+        
+        /* 减少动画偏好支持 */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+        
+        /* 触摸设备优化 */
+        @media (hover: none) and (pointer: coarse) {
+            button:hover,
+            .video-id-btn:hover,
+            .tab:hover {
+                transform: none;
+            }
+            
+            button:active,
+            .video-id-btn:active,
+            .tab:active {
+                transform: scale(0.98);
+            }
+        }
+        
+        /* 登录页面样式 */
+        .login-page {
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .login-page h1 {
+            margin-bottom: 20px;
+        }
+        
+        .login-page .subtitle {
+            margin-bottom: 30px;
+        }
+        
+        #loginError,
+        #loginSuccess {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="loginPage" class="container login-page">
+        <h1>腾讯视频链接生成器</h1>
+        <p class="subtitle">请输入秘钥登录</p>
+        
+        <div class="input-group">
+            <label for="secretKey">秘钥</label>
+            <input type="password" id="secretKey" placeholder="请输入秘钥">
+        </div>
+        
+        <button id="loginBtn">登录</button>
+        
+        <div class="error" id="loginError"></div>
+        <div class="success" id="loginSuccess"></div>
+        
+        <div class="footer">
+            <p>腾讯视频链接生成器 - by老鼠鼠66</p>
+        </div>
+    </div>
+    
+    <!-- 主页面容器 -->
+    <div id="mainPage" class="container" style="display: none;">
+        <a href="http://116.62.179.232:5002" class="back-btn">返回</a>
+        <h1>腾讯视频链接生成器 - by老鼠鼠66</h1>
+        <p class="subtitle">请选择或输入视频ID，系统将自动生成可播放的视频链接</p>
+        
+        <div class="info-panel">
+            <h3>使用说明</h3>
+            <p>您可以从下方列表中选择视频ID，或手动输入视频ID，系统将自动获取视频信息并生成播放链接。</p>
+            <p><strong>新功能：</strong> 分类和作者目录已改为可折叠按钮形式，点击可展开/收起。</p>
+        </div>
+        
+        <!-- 主选项卡 -->
+        <div class="tabs">
+            <div class="tab active" data-tab="manual">手动输入视频ID</div>
+            <div class="tab" data-tab="select">从列表选择视频ID</div>
+        </div>
+        
+        <!-- 手动输入选项卡内容 -->
+        <div class="tab-content active" id="manual-tab">
+            <div class="input-group">
+                <label for="videoId">视频ID</label>
+                <input type="text" id="videoId" placeholder="例如：u0035k8k3y3">
+                <p class="example">示例: u0035k8k3y3 (可以从上方选择或手动输入)</p>
+            </div>
+        </div>
+        
+        <!-- 选择视频ID选项卡内容 -->
+        <div class="tab-content" id="select-tab">
+            <div class="video-id-selector" id="videoIdSelector">
+                <div class="selector-title">选择视频ID：</div>
+                <div id="videoDataContainer">
+                    <div class="loading-indicator">加载目录数据中...</div>
+                </div>
+            </div>
+        </div>
+        
+        <button id="generateBtn">生成视频链接</button>
+        
+        <div class="error" id="errorMsg"></div>
+        <div class="success" id="successMsg"></div>
+        
+        <div class="result" id="resultSection">
+            <div class="result-title">生成的链接:</div>
+            <div class="result-box" id="resultBox"></div>
+            <div class="action-buttons">
+                <button class="copy-btn" id="copyBtn">复制链接</button>
+                <a href="#" class="jump-btn disabled" id="jumpBtn" target="_blank">跳转到视频页面</a>
+            </div>
+        </div>
+        
+        <!-- 统一功能按钮区域 -->
+        <div class="function-buttons">
+            
+            <!-- 退出登录按钮 -->
+            <button id="logoutBtn" class="back-btn logout-btn">退出登录</button>
+            
+            <!-- 上传视频vid按钮（对所有用户可见） -->
+            <a href="upload-video.html" class="back-btn" target="_blank">上传视频vid</a>
+            
+            <!-- 密钥管理入口（仅管理员可见） -->
+            <a href="key-management.html" class="back-btn admin-only" id="keyManagementBtn" style="display: none;" target="_blank">密钥管理</a>
+            
+        </div>
+        
+        <div class="footer">
+            <p>腾讯视频链接生成器 - by老鼠鼠66</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化全局登录页面和主页面元素
+            loginPage = document.getElementById('loginPage');
+            mainPage = document.getElementById('mainPage');
+            const secretKeyInput = document.getElementById('secretKey');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+            const loginSuccess = document.getElementById('loginSuccess');
+            
+            checkAuthStatus();
+            
+            async function checkAuthStatus() {
+                try {
+                    const response = await fetch('/api/check-auth');
+                    const data = await response.json();
+                    
+                    if (data.authenticated) {
+                        currentUserType = data.userType; // 存储用户类型
+                        showMainPage();
+                    }
+                } catch (error) {
+                    console.error('检查认证状态失败:', error);
+                }
+            }
+            
+            loginBtn.addEventListener('click', handleLogin);
+            
+            secretKeyInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+            
+            async function handleLogin() {
+                const key = secretKeyInput.value.trim();
+                
+                if (!key) {
+                    showLoginError('请输入秘钥');
+                    return;
+                }
+                
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 登录中...';
+                
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ key })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        currentUserType = data.userType; // 存储用户类型
+                        showLoginSuccess('登录成功！');
+                        setTimeout(() => {
+                            showMainPage();
+                        }, 1000);
+                    } else {
+                        showLoginError(data.message || '登录失败');
+                    }
+                } catch (error) {
+                    showLoginError('登录失败，请稍后重试');
+                } finally {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '登录';
+                }
+            }
+            
+            function showLoginError(message) {
+                loginError.textContent = message;
+                loginSuccess.classList.remove('show');
+                loginSuccess.style.display = 'none';
+                loginError.classList.remove('show');
+                loginError.style.display = 'block';
+                setTimeout(() => {
+                    loginError.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    loginError.classList.remove('show');
+                    loginError.style.display = 'none';
+                }, 5000);
+            }
+            
+            function showLoginSuccess(message) {
+                loginSuccess.textContent = message;
+                loginError.classList.remove('show');
+                loginError.style.display = 'none';
+                loginSuccess.classList.remove('show');
+                loginSuccess.style.display = 'block';
+                setTimeout(() => {
+                    loginSuccess.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    loginSuccess.classList.remove('show');
+                    loginSuccess.style.display = 'none';
+                }, 3000);
+            }
+        });
+        
+        // 全局变量用于存储登录页面和主页面元素
+        let loginPage, mainPage;
+        // 全局变量存储当前用户类型
+        let currentUserType = null;
+        
+        // 全局显示主页面函数
+        function showMainPage() {
+            loginPage.style.display = 'none';
+            mainPage.style.display = 'block';
+            loadVideoDataFromFile();
+            
+            // 检查用户类型，如果是管理员则显示密钥管理入口
+            if (currentUserType === 'admin') {
+                showKeyManagementEntry();
+            }
+            
+            // 添加退出登录按钮事件监听器
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
+        }
+        
+        // 退出登录处理函数
+        async function handleLogout() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 重置用户类型
+                    currentUserType = null;
+                    
+                    // 显示登录页面
+                    loginPage.style.display = 'block';
+                    mainPage.style.display = 'none';
+                    
+                    // 清空视频ID输入框
+                    const videoIdInput = document.getElementById('videoId');
+                    if (videoIdInput) {
+                        videoIdInput.value = '';
+                    }
+                }
+            } catch (error) {
+                console.error('退出登录失败:', error);
+            }
+        }
+        
+        // 显示密钥管理入口
+        function showKeyManagementEntry() {
+            const keyManagementBtn = document.getElementById('keyManagementBtn');
+            if (keyManagementBtn) {
+                keyManagementBtn.style.display = 'inline-block';
+            }
+        }
+
+        // 全局渲染视频数据函数
+        function renderVideoData() {
+            const videoDataContainer = document.getElementById('videoDataContainer');
+            const videoIdInput = document.getElementById('videoId');
+            
+            if (!videoData || !videoData.categories) {
+                videoDataContainer.innerHTML = '<div class="empty-message">暂无视频数据，请检查数据文件</div>';
+                return;
+            }
+            
+            let html = '';
+            
+            // 遍历分类
+            videoData.categories.forEach(category => {
+                html += `<div class="category">
+                    <button class="category-btn" data-category="${category.id}">
+                        <span>${category.name}</span>
+                        <span class="arrow">▶</span>
+                    </button>
+                    <div class="category-content">
+                `;
+                
+                // 遍历作者
+                if (category.authors && category.authors.length > 0) {
+                    category.authors.forEach(author => {
+                        html += `<div class="author">
+                            <button class="author-btn" data-author="${author.id}">
+                                <span>${author.name}</span>
+                                <span class="arrow">▶</span>
+                            </button>
+                            <div class="author-content">
+                                <div class="video-id-list">`;
+                        
+                        // 遍历视频ID
+                        if (author.videos && author.videos.length > 0) {
+                            author.videos.forEach(video => {
+                                html += `<button class="video-id-btn" data-id="${video.id}">${video.name}</button>`;
+                            });
+                        } else {
+                            html += '<div class="empty-message">暂无视频</div>';
+                        }
+                        
+                        html += `</div></div></div>`;
+                    });
+                } else {
+                    html += '<div class="empty-message">此分类下暂无作者</div>';
+                }
+                
+                html += `</div></div>`;
+            });
+            
+            videoDataContainer.innerHTML = html;
+            
+            // 添加分类按钮点击事件
+            videoDataContainer.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const categoryContent = this.nextElementSibling;
+                    const isExpanded = this.classList.contains('expanded');
+                    
+                    // 切换展开状态
+                    this.classList.toggle('expanded');
+                    categoryContent.classList.toggle('expanded');
+                    
+                    // 如果展开，收起其他分类
+                    if (!isExpanded) {
+                        videoDataContainer.querySelectorAll('.category-btn').forEach(otherBtn => {
+                            if (otherBtn !== this) {
+                                otherBtn.classList.remove('expanded');
+                                otherBtn.nextElementSibling.classList.remove('expanded');
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // 添加作者按钮点击事件
+            videoDataContainer.querySelectorAll('.author-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const authorContent = this.nextElementSibling;
+                    
+                    // 切换展开状态
+                    this.classList.toggle('expanded');
+                    authorContent.classList.toggle('expanded');
+                });
+            });
+            
+            // 添加视频ID按钮点击事件
+            videoDataContainer.querySelectorAll('.video-id-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    videoDataContainer.querySelectorAll('.video-id-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    // 添加当前按钮的active类
+                    this.classList.add('active');
+                    
+                    // 将视频ID填入输入框
+                    const videoId = this.getAttribute('data-id');
+                    videoIdInput.value = videoId;
+                    
+                    // 切换到手动输入选项卡
+                    document.querySelector('.tab[data-tab="manual"]').click();
+                });
+            });
+        }
+
+        // 全局从外部JSON文件加载数据函数
+        async function loadVideoDataFromFile() {
+            const container = document.getElementById('videoDataContainer');
+            container.innerHTML = '<div class="loading-indicator"><div class="loading-dots"><span></span><span></span><span></span></div> 加载目录数据中...</div>';
+            
+            try {
+                const response = await fetch('/api/video-data');
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态: ${response.status}`);
+                }
+                const data = await response.json();
+                videoData = data;
+                
+                setTimeout(() => {
+                    container.style.opacity = '0';
+                    setTimeout(() => {
+                        renderVideoData();
+                        container.style.transition = 'opacity 0.3s ease';
+                        container.style.opacity = '1';
+                    }, 300);
+                }, 300);
+            } catch (error) {
+                console.warn('无法加载视频数据:', error);
+                setTimeout(() => {
+                    container.style.opacity = '0';
+                    setTimeout(() => {
+                        renderVideoData();
+                        container.style.transition = 'opacity 0.3s ease';
+                        container.style.opacity = '1';
+                    }, 300);
+                }, 300);
+            }
+        }
+        
+        // 视频ID数据数组 - 从外部JSON文件加载
+        let videoData = {
+            "categories": [
+                {
+                    "id": "delta",
+                    "name": "三角洲",
+                    "authors": [
+                        {
+                            "id": "shangxian",
+                            "name": "上仙-三角洲行动",
+                            "videos": [
+                                { "id": "n3567igelll", "name": "n3567igelll" },
+                                { "id": "e3567fqw7tb", "name": "e3567fqw7tb" },
+                                { "id": "z35677l1ss1", "name": "z35677l1ss1" },
+                                { "id": "w3567kuigcc", "name": "w3567kuigcc" },
+                                { "id": "y35670g54zh", "name": "y35670g54zh" },
+                                { "id": "c3567y86rk5", "name": "c3567y86rk5" },
+                                { "id": "s3567z3oov4", "name": "s3567z3oov4" }
+                            ]
+                        },
+                        {
+                            "id": "jiantiao", 
+                            "name": "俭条",
+                            "videos": [
+                                { "id": "c3175e5n5a7", "name": "c3175e5n5a7" },
+                                { "id": "o3175o60148", "name": "o3175o60148" },
+                                { "id": "k3175pgg7zt", "name": "k3175pgg7zt" },
+                                { "id": "i3175qeaysv", "name": "i3175qeaysv" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检测设备类型并应用相应的类
+            function detectDevice() {
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                const isTablet = /iPad|Android(?!.*Mobile)/i.test(navigator.userAgent);
+                const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+                
+                if (isMobile) {
+                    document.body.classList.add('device-mobile');
+                } else if (isTablet) {
+                    document.body.classList.add('device-tablet');
+                } else {
+                    document.body.classList.add('device-desktop');
+                }
+                
+                if (isTouchDevice) {
+                    document.body.classList.add('device-touch');
+                } else {
+                    document.body.classList.add('device-mouse');
+                }
+            }
+            
+            // 执行设备检测
+            detectDevice();
+            
+            // 为元素添加加载动画类
+            document.querySelectorAll('div, button, input, a').forEach(el => {
+                if (!el.classList.contains('animate-on-load')) {
+                    el.classList.add('animate-on-load');
+                }
+            });
+            
+            // 为可交互元素添加点击动画类
+            document.querySelectorAll('button, .tab, .video-id-btn, a').forEach(el => {
+                el.classList.add('animate-on-click');
+            });
+            
+            // 为移动设备添加防止长按菜单的处理
+            if (document.body.classList.contains('device-touch')) {
+                document.querySelectorAll('button, a, .tab, .video-id-btn').forEach(el => {
+                    el.addEventListener('contextmenu', (e) => e.preventDefault());
+                });
+            }
+            
+            // 添加设备信息显示和测试功能
+            
+            // 初始化全局登录页面和主页面元素（确保在所有情况下都可用）
+            loginPage = loginPage || document.getElementById('loginPage');
+            mainPage = mainPage || document.getElementById('mainPage');
+            function initDeviceTestTools() {
+                // 插入设备信息面板
+                const infoPanel = document.createElement('div');
+                infoPanel.className = 'device-info-panel';
+                infoPanel.style.cssText = `
+                    position: fixed;
+                    bottom: 10px;
+                    right: 10px;
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 1px solid var(--border-color);
+                    border-radius: var(--border-radius);
+                    padding: 12px;
+                    font-size: 12px;
+                    z-index: 9999;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    max-width: 300px;
+                    backdrop-filter: blur(5px);
+                `;
+                
+                // 获取视口信息
+                const viewportInfo = {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    devicePixelRatio: window.devicePixelRatio
+                };
+                
+                let deviceType = '桌面端';
+                if (document.body.classList.contains('device-mobile')) {
+                    deviceType = '移动端';
+                } else if (document.body.classList.contains('device-tablet')) {
+                    deviceType = '平板端';
+                }
+                
+                let inputType = '鼠标';
+                if (document.body.classList.contains('device-touch')) {
+                    inputType = '触屏';
+                }
+                
+                infoPanel.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 5px; color: var(--text-primary);">设备适配信息</div>
+                    <div>设备类型: ${deviceType}</div>
+                    <div>输入方式: ${inputType}</div>
+                    <div>视口尺寸: ${viewportInfo.width}×${viewportInfo.height}px</div>
+                    <div>像素比: ${viewportInfo.devicePixelRatio}</div>
+                    <button id="testResponsive" style="
+                        margin-top: 8px;
+                        padding: 4px 8px;
+                        font-size: 11px;
+                        background: var(--primary-color);
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        width: 100%;
+                    ">测试响应式</button>
+                `;
+                
+                document.body.appendChild(infoPanel);
+                
+                // 监听视口变化
+                window.addEventListener('resize', function() {
+                    infoPanel.innerHTML = `
+                        <div style="font-weight: bold; margin-bottom: 5px; color: var(--text-primary);">设备适配信息</div>
+                        <div>设备类型: ${deviceType}</div>
+                        <div>输入方式: ${inputType}</div>
+                        <div>视口尺寸: ${window.innerWidth}×${window.innerHeight}px</div>
+                        <div>像素比: ${window.devicePixelRatio}</div>
+                        <button id="testResponsive" style="
+                            margin-top: 8px;
+                            padding: 4px 8px;
+                            font-size: 11px;
+                            background: var(--primary-color);
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            width: 100%;
+                        ">测试响应式</button>
+                    `;
+                    
+                    // 重新绑定测试按钮事件
+                    document.getElementById('testResponsive').addEventListener('click', simulateResponsiveTest);
+                });
+                
+                // 测试按钮事件处理
+                document.getElementById('testResponsive').addEventListener('click', simulateResponsiveTest);
+            }
+            
+            // 响应式测试函数
+            function simulateResponsiveTest() {
+                // 创建测试窗口
+                const testWindow = document.createElement('div');
+                testWindow.className = 'responsive-test-window';
+                testWindow.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    border: 1px solid var(--border-color);
+                    border-radius: var(--border-radius);
+                    padding: 20px;
+                    z-index: 10000;
+                    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+                    max-width: 90vw;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    min-width: 300px;
+                `;
+                
+                // 创建测试设备尺寸选择器
+                testWindow.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <h3 style="margin-top: 0; color: var(--text-primary);">响应式测试</h3>
+                        <p style="font-size: 14px; color: var(--text-secondary);">选择设备尺寸测试适配效果:</p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                        <button class="device-preset" data-width="320" data-height="568">iPhone SE</button>
+                        <button class="device-preset" data-width="375" data-height="667">iPhone 8</button>
+                        <button class="device-preset" data-width="414" data-height="736">iPhone 8 Plus</button>
+                        <button class="device-preset" data-width="375" data-height="812">iPhone X</button>
+                        <button class="device-preset" data-width="414" data-height="896">iPhone 11</button>
+                        <button class="device-preset" data-width="768" data-height="1024">iPad</button>
+                        <button class="device-preset" data-width="1024" data-height="768">iPad 横屏</button>
+                        <button class="device-preset" data-width="1440" data-height="900">笔记本</button>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-secondary);">自定义尺寸:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" id="customWidth" placeholder="宽度" min="320" max="2560" style="flex: 1; padding: 5px;">
+                            <input type="number" id="customHeight" placeholder="高度" min="480" max="1600" style="flex: 1; padding: 5px;">
+                            <button id="applyCustomSize" style="padding: 0 10px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">应用</button>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button id="closeTest" style="padding: 8px 20px; background: var(--medium-gray); color: var(--text-primary); border: none; border-radius: 4px; cursor: pointer;">关闭</button>
+                    </div>
+                `;
+                
+                // 添加样式到设备预设按钮
+                const presetStyle = document.createElement('style');
+                presetStyle.textContent = `
+                    .device-preset {
+                        padding: 8px;
+                        font-size: 12px;
+                        background: var(--light-gray);
+                        color: var(--text-secondary);
+                        border: 1px solid var(--border-color);
+                        border-radius: 4px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    }
+                    .device-preset:hover {
+                        background: var(--medium-gray);
+                    }
+                `;
+                document.head.appendChild(presetStyle);
+                
+                // 添加到页面
+                document.body.appendChild(testWindow);
+                
+                // 添加设备预设点击事件
+                document.querySelectorAll('.device-preset').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const width = this.getAttribute('data-width');
+                        const height = this.getAttribute('data-height');
+                        
+                        // 调整测试窗口尺寸
+                        testWindow.style.width = width + 'px';
+                        testWindow.style.height = height + 'px';
+                        testWindow.style.transform = 'translate(-50%, -50%) scale(0.95)';
+                        
+                        // 提示用户
+                        showMessage(`已调整为${width}×${height}px的设备尺寸`);
+                    });
+                });
+                
+                // 自定义尺寸应用按钮
+                document.getElementById('applyCustomSize').addEventListener('click', function() {
+                    const width = document.getElementById('customWidth').value;
+                    const height = document.getElementById('customHeight').value;
+                    
+                    if (width && height && width >= 320 && width <= 2560 && height >= 480 && height <= 1600) {
+                        testWindow.style.width = width + 'px';
+                        testWindow.style.height = height + 'px';
+                        testWindow.style.transform = 'translate(-50%, -50%) scale(0.95)';
+                        showMessage(`已调整为${width}×${height}px的自定义尺寸`);
+                    } else {
+                        showMessage('请输入有效的尺寸（宽度: 320-2560px, 高度: 480-1600px）');
+                    }
+                });
+                
+                // 关闭按钮
+                document.getElementById('closeTest').addEventListener('click', function() {
+                    document.body.removeChild(testWindow);
+                    document.head.removeChild(presetStyle);
+                });
+            }
+            
+            // 初始化设备测试工具
+            //initDeviceTestTools();
+            
+            const videoIdInput = document.getElementById('videoId');
+            const generateBtn = document.getElementById('generateBtn');
+            const resultSection = document.getElementById('resultSection');
+            const resultBox = document.getElementById('resultBox');
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+            const copyBtn = document.getElementById('copyBtn');
+            const jumpBtn = document.getElementById('jumpBtn');
+            const videoDataContainer = document.getElementById('videoDataContainer');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // 设置示例视频ID
+            videoIdInput.value = 'u0035k8k3y3';
+            
+            // 初始化视频数据
+            renderVideoData();
+            
+            // 主选项卡切换功能
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有标签的active类
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // 添加当前标签的active类
+                    this.classList.add('active');
+                    
+                    // 隐藏所有标签内容
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // 显示当前标签对应的内容
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // 生成按钮点击事件
+            generateBtn.addEventListener('click', function() {
+                const videoId = videoIdInput.value.trim();
+                if (!videoId) {
+                    showError('请输入视频ID');
+                    return;
+                }
+                
+                // 显示加载状态 - 使用加载点动画
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 处理中...';
+                
+                // 隐藏之前的结果和错误信息
+                resultSection.classList.remove('show');
+                resultSection.style.display = 'none';
+                errorMsg.classList.remove('show');
+                errorMsg.style.display = 'none';
+                successMsg.classList.remove('show');
+                successMsg.style.display = 'none';
+                
+                // 禁用跳转按钮
+                jumpBtn.classList.add('disabled');
+                jumpBtn.href = "#";
+                
+                // 使用JSONP方式获取数据
+                fetchDataWithJsonp(videoId);
+            });
+            
+            // 使用JSONP获取数据
+            function fetchDataWithJsonp(videoId) {
+                // 构建API URL
+                const apiUrl = `https://vv.video.qq.com/getinfo?vids=${videoId}&platform=101001&charge=0&otype=json&defn=shd&callback=handleJsonpResponse`;
+                
+                // 创建全局回调函数
+                window.handleJsonpResponse = function(data) {
+                    try {
+                        // 提取关键字段
+                        const targetKey = Object.keys(data).find(key => 
+                            key.toLowerCase() === 'vl'.toLowerCase()
+                        );
+                        if (!targetKey) throw new Error('未找到视频数据');
+                        
+                        const videoData = data[targetKey].vi[0];
+                        if (!videoData) throw new Error('视频数据格式错误，未找到vi数组');
+                        
+                        // 根据JSON结构提取字段
+                        const fn = videoData.fn || '';
+                        const fvkey = videoData.fvkey || '';
+                        const fmd5 = videoData.fmd5 || videoData.md5 || '';
+                        
+                        // 获取url
+                        let url = '';
+                        if (videoData.ul && videoData.ul.ui && videoData.ul.ui[0]) {
+                            url = videoData.ul.ui[0].url || '';
+                        }
+                        
+                        // 验证必要字段
+                        if (!url || !fn || !fvkey || !fmd5) {
+                            throw new Error('缺少必要的视频参数');
+                        }
+                        
+                        // 生成最终链接
+                        const resultUrl = `${url}${fn}?sdtfrom=v1010&guid=${fmd5}&vkey=${fvkey}`;
+                        
+                        // 显示结果并添加动画
+                        resultBox.textContent = resultUrl;
+                        resultSection.style.display = 'block';
+                        setTimeout(() => {
+                            resultSection.classList.add('show');
+                        }, 10);
+                        
+                        // 启用跳转按钮
+                        jumpBtn.classList.remove('disabled');
+                        jumpBtn.href = resultUrl;
+                        
+                        showSuccess('链接生成成功！');
+                        
+                    } catch (error) {
+                        console.error('处理失败:', error);
+                        showError(`处理失败: ${error.message}`);
+                    } finally {
+                        // 恢复按钮状态
+                        generateBtn.innerHTML = '生成视频链接';
+                        generateBtn.disabled = false;
+                    }
+                };
+                
+                // 创建script标签用于JSONP请求
+                const script = document.createElement('script');
+                script.src = apiUrl;
+                
+                // 设置错误处理
+                script.onerror = function() {
+                    showError('请求失败，请检查视频ID或网络连接');
+                    generateBtn.innerHTML = '生成视频链接';
+                    generateBtn.disabled = false;
+                };
+                
+                // 添加到文档中触发请求
+                document.head.appendChild(script);
+                
+                // 请求完成后清理script标签
+                script.onload = function() {
+                    document.head.removeChild(script);
+                };
+            }
+            
+            // 复制按钮点击事件
+            copyBtn.addEventListener('click', function() {
+                const textToCopy = resultBox.textContent;
+                
+                // 添加点击反馈动画
+                this.classList.add('animate-on-click');
+                
+                // 使用Clipboard API复制文本
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(textToCopy).then(function() {
+                        showSuccess('链接已复制到剪贴板！');
+                    }, function() {
+                        // 备用方案
+                        copyToClipboardFallback(textToCopy);
+                    });
+                } else {
+                    // 备用方案
+                    copyToClipboardFallback(textToCopy);
+                }
+            });
+            
+            // 备用复制方案
+            function copyToClipboardFallback(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showSuccess('链接已复制到剪贴板！');
+                } catch (err) {
+                    showError('复制失败，请手动选择并复制链接');
+                }
+                document.body.removeChild(textArea);
+            }
+            
+            // 显示错误消息
+            function showError(message) {
+                errorMsg.textContent = message;
+                successMsg.classList.remove('show');
+                successMsg.style.display = 'none';
+                errorMsg.classList.remove('show');
+                
+                // 先设置display为block，再添加show类
+                errorMsg.style.display = 'block';
+                setTimeout(() => {
+                    errorMsg.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    errorMsg.classList.remove('show');
+                    errorMsg.style.display = 'none';
+                }, 5000);
+            }
+            
+            // 显示成功消息
+            function showSuccess(message) {
+                successMsg.textContent = message;
+                errorMsg.classList.remove('show');
+                errorMsg.style.display = 'none';
+                successMsg.classList.remove('show');
+                
+                // 先设置display为block，再添加show类
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                    successMsg.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 隐藏所有消息
+            function hideMessages() {
+                errorMsg.classList.remove('show');
+                successMsg.classList.remove('show');
+            }
+            
+            // 按Enter键触发生成
+            videoIdInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    generateBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

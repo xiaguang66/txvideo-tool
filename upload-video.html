@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传视频vid - 腾讯视频链接生成器</title>
+    <style>
+        /* 复用主页面的样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #66a1c2;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #343a40;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.16);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e9ecef, #ced4da, #adb5bd);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .container:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: calc(var(--border-radius) - 2px);
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        h1 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: var(--light-gray);
+        }
+        
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15);
+            background-color: white;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: var(--light-gray);
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15);
+            background-color: white;
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button.import {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .section h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #2ecc71;
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #e74c3c;
+        }
+        
+        .loading-dots {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            margin: 0 4px;
+            animation: pulse 1.4s infinite ease-in-out;
+        }
+        
+        .loading-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .data-view {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            background: white;
+            margin-top: 10px;
+        }
+        
+        .category-item, .author-item, .video-item {
+            padding: 8px 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+            border-left: 4px solid var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .category-item:hover, .author-item:hover, .video-item:hover {
+            background: #f0f5ff;
+            transform: translateX(3px);
+        }
+        
+        .author-item {
+            border-left-color: var(--accent-color);
+            margin-left: 15px;
+        }
+        
+        .video-item {
+            border-left-color: #2ecc71;
+            margin-left: 30px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid var(--medium-gray);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">返回主页面</a>
+        <h1>上传视频vid</h1>
+        <p class="subtitle">添加新的视频ID到数据库中</p>
+        
+        <div class="notification" id="notification">操作成功！</div>
+        
+        <!-- 添加视频表单 -->
+        <div class="section">
+            <h2>单个视频上传</h2>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="videoCategory">选择分类</label>
+                    <select id="videoCategory">
+                        <option value="">-- 请选择分类 --</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="videoAuthor">选择作者</label>
+                    <select id="videoAuthor">
+                        <option value="">-- 请先选择分类 --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="videoId">视频ID</label>
+                    <input type="text" id="videoId" placeholder="例如：u0035k8k3y3">
+                </div>
+                <div class="input-group">
+                    <label for="videoName">视频名称</label>
+                    <input type="text" id="videoName" placeholder="例如：腾讯视频示例视频">
+                </div>
+            </div>
+            <button id="addVideoBtn">添加视频</button>
+        </div>
+        
+        <!-- 新建分类/作者 -->
+        <div class="section">
+            <h2>管理分类和作者</h2>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="newCategoryName">新建分类</label>
+                    <input type="text" id="newCategoryName" placeholder="分类名称">
+                </div>
+                <div class="input-group">
+                    <label for="newCategoryId">分类ID</label>
+                    <input type="text" id="newCategoryId" placeholder="例如：category1">
+                </div>
+            </div>
+            <button id="addCategoryBtn">添加分类</button>
+            
+            <div style="margin-top: 20px;"></div>
+            
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="authorCategory">作者所属分类</label>
+                    <select id="authorCategory">
+                        <option value="">-- 请选择分类 --</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="newAuthorName">新建作者</label>
+                    <input type="text" id="newAuthorName" placeholder="作者名称">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="newAuthorId">作者ID</label>
+                    <input type="text" id="newAuthorId" placeholder="例如：author1">
+                </div>
+            </div>
+            <button id="addAuthorBtn">添加作者</button>
+        </div>
+        
+        <!-- 批量上传 -->
+        <div class="section">
+            <h2>批量视频上传</h2>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="batchCategory">选择分类</label>
+                    <select id="batchCategory">
+                        <option value="">-- 请选择分类 --</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="batchAuthor">选择作者</label>
+                    <select id="batchAuthor">
+                        <option value="">-- 请先选择分类 --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="batchInput">视频数据（每行格式：视频名称 视频ID）</label>
+                <textarea id="batchInput" rows="10" placeholder="例如：
+视频1 y00207R9opc
+视频2 e002120Vmdu
+视频3 v0020Sk2lw4"></textarea>
+            </div>
+            <button class="import" id="batchImportBtn">批量导入</button>
+        </div>
+        
+        <!-- 数据视图 -->
+        <div class="section">
+            <h2>当前数据</h2>
+            <div id="dataView" class="data-view">
+                <div class="loading-dots"><span></span><span></span><span></span></div> 加载数据中...
+            </div>
+        </div>
+        
+        <!-- 管理员删除功能 -->
+        <div class="section admin-section" id="adminDeleteSection" style="display: none;">
+            <h2>管理员删除功能</h2>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="deleteType">删除类型</label>
+                    <select id="deleteType">
+                        <option value="">-- 请选择删除类型 --</option>
+                        <option value="video">删除单个视频</option>
+                        <option value="author">删除作者及其所有视频</option>
+                        <option value="category">删除分类及其所有内容</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 删除单个视频 -->
+            <div id="deleteVideoSection" style="display: none; margin-top: 20px;">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="delVideoCategory">选择分类</label>
+                        <select id="delVideoCategory">
+                            <option value="">-- 请选择分类 --</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="delVideoAuthor">选择作者</label>
+                        <select id="delVideoAuthor">
+                            <option value="">-- 请先选择分类 --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="delVideo">选择视频</label>
+                        <select id="delVideo">
+                            <option value="">-- 请先选择作者 --</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="deleteVideoBtn" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">删除视频</button>
+            </div>
+            
+            <!-- 删除作者 -->
+            <div id="deleteAuthorSection" style="display: none; margin-top: 20px;">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="delAuthorCategory">选择分类</label>
+                        <select id="delAuthorCategory">
+                            <option value="">-- 请选择分类 --</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="delAuthor">选择作者</label>
+                        <select id="delAuthor">
+                            <option value="">-- 请先选择分类 --</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="deleteAuthorBtn" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">删除作者及其所有视频</button>
+            </div>
+            
+            <!-- 删除分类 -->
+            <div id="deleteCategorySection" style="display: none; margin-top: 20px;">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="delCategory">选择分类</label>
+                        <select id="delCategory">
+                            <option value="">-- 请选择分类 --</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="deleteCategoryBtn" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">删除分类及其所有内容</button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>腾讯视频链接生成器 - by老鼠鼠66</p>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let videoData = { categories: [] };
+        let currentUserType = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查用户是否已登录
+            checkAuthStatus();
+        });
+        
+        // 检查用户认证状态
+        function checkAuthStatus() {
+            fetch('/api/check-auth')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.authenticated) {
+                        // 未登录，重定向到登录页面
+                        window.location.href = 'index.html';
+                    } else {
+                        // 保存用户类型
+                        currentUserType = data.userType;
+                        // 如果是管理员，显示删除功能
+                        if (currentUserType === 'admin') {
+                            document.getElementById('adminDeleteSection').style.display = 'block';
+                        }
+                        
+                        // 认证成功后再加载数据
+                        loadVideoData();
+                        setupEventListeners();
+                    }
+                })
+                .catch(error => {
+                    console.error('检查认证状态失败:', error);
+                    window.location.href = 'index.html';
+                });
+        }
+        
+        // 加载视频数据
+        function loadVideoData() {
+            fetch('/api/video-data')
+                .then(response => response.json())
+                .then(data => {
+                    videoData = data;
+                    updateSelects();
+                    updateDataView();
+                })
+                .catch(error => {
+                    console.error('加载视频数据失败:', error);
+                    showNotification('加载数据失败', 'error');
+                });
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 单个视频上传
+            document.getElementById('addVideoBtn').addEventListener('click', addVideo);
+            
+            // 批量视频上传
+            document.getElementById('batchImportBtn').addEventListener('click', batchImport);
+            
+            // 新建分类
+            document.getElementById('addCategoryBtn').addEventListener('click', addCategory);
+            
+            // 新建作者
+            document.getElementById('addAuthorBtn').addEventListener('click', addAuthor);
+            
+            // 分类选择变化时更新作者下拉框
+            document.querySelectorAll('select[id$="Category"]').forEach(select => {
+                select.addEventListener('change', function() {
+                    const authorSelectId = this.id.replace('Category', 'Author');
+                    updateAuthorSelect(this.value, authorSelectId);
+                });
+            });
+            
+            // 作者选择变化时更新视频下拉框
+            document.querySelectorAll('select[id$="Author"]').forEach(select => {
+                select.addEventListener('change', function() {
+                    const videoSelectId = this.id.replace('Author', '');
+                    if (videoSelectId === 'delVideo') {
+                        updateVideoSelect(this.value, videoSelectId);
+                    }
+                });
+            });
+            
+            // 删除类型选择变化时显示不同的删除表单
+            const deleteTypeSelect = document.getElementById('deleteType');
+            if (deleteTypeSelect) {
+                deleteTypeSelect.addEventListener('change', function() {
+                    const deleteType = this.value;
+                    // 隐藏所有删除表单
+                    document.getElementById('deleteVideoSection').style.display = 'none';
+                    document.getElementById('deleteAuthorSection').style.display = 'none';
+                    document.getElementById('deleteCategorySection').style.display = 'none';
+                    
+                    // 显示选中的删除表单
+                    if (deleteType) {
+                        document.getElementById('delete' + capitalizeFirstLetter(deleteType) + 'Section').style.display = 'block';
+                    }
+                });
+            }
+            
+            // 删除视频按钮
+            const deleteVideoBtn = document.getElementById('deleteVideoBtn');
+            if (deleteVideoBtn) {
+                deleteVideoBtn.addEventListener('click', deleteVideo);
+            }
+            
+            // 删除作者按钮
+            const deleteAuthorBtn = document.getElementById('deleteAuthorBtn');
+            if (deleteAuthorBtn) {
+                deleteAuthorBtn.addEventListener('click', deleteAuthor);
+            }
+            
+            // 删除分类按钮
+            const deleteCategoryBtn = document.getElementById('deleteCategoryBtn');
+            if (deleteCategoryBtn) {
+                deleteCategoryBtn.addEventListener('click', deleteCategory);
+            }
+        }
+        
+        // 首字母大写辅助函数
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        
+        // 添加单个视频
+        function addVideo() {
+            const categoryId = document.getElementById('videoCategory').value;
+            const authorId = document.getElementById('videoAuthor').value;
+            const videoId = document.getElementById('videoId').value.trim();
+            const videoName = document.getElementById('videoName').value.trim();
+            
+            if (!categoryId || !authorId || !videoId || !videoName) {
+                showNotification('请填写所有字段', 'error');
+                return;
+            }
+            
+            // 检查vid长度不超过50个字符
+            if (videoId.length > 50) {
+                showNotification('视频ID不能超过50个字符', 'error');
+                return;
+            }
+            
+            const addVideoBtn = document.getElementById('addVideoBtn');
+            const originalText = addVideoBtn.innerHTML;
+            addVideoBtn.disabled = true;
+            addVideoBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 添加中...';
+            
+            // 找到分类和作者
+            const category = videoData.categories.find(cat => cat.id === categoryId);
+            const author = category.authors.find(auth => auth.id === authorId);
+            
+            // 检查视频ID是否已存在
+            if (author.videos.some(video => video.id === videoId)) {
+                addVideoBtn.disabled = false;
+                addVideoBtn.innerHTML = originalText;
+                showNotification('视频ID已存在', 'error');
+                return;
+            }
+            
+            // 添加新视频
+            author.videos.push({ id: videoId, name: videoName });
+            
+            // 保存数据到服务器
+            saveVideoData()
+                .then(() => {
+                    // 清空输入框
+                    document.getElementById('videoId').value = '';
+                    document.getElementById('videoName').value = '';
+                    
+                    updateDataView();
+                    showNotification('视频添加成功');
+                })
+                .catch(error => {
+                    console.error('保存视频失败:', error);
+                    showNotification('保存失败', 'error');
+                })
+                .finally(() => {
+                    addVideoBtn.disabled = false;
+                    addVideoBtn.innerHTML = originalText;
+                });
+        }
+        
+        // 批量导入视频
+        function batchImport() {
+            const categoryId = document.getElementById('batchCategory').value;
+            const authorId = document.getElementById('batchAuthor').value;
+            const input = document.getElementById('batchInput').value.trim();
+            
+            if (!categoryId || !authorId || !input) {
+                showNotification('请选择分类、作者并输入视频数据', 'error');
+                return;
+            }
+            
+            const batchImportBtn = document.getElementById('batchImportBtn');
+            const originalText = batchImportBtn.innerHTML;
+            batchImportBtn.disabled = true;
+            batchImportBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 导入中...';
+            
+            // 找到分类和作者
+            const category = videoData.categories.find(cat => cat.id === categoryId);
+            const author = category.authors.find(auth => auth.id === authorId);
+            
+            // 解析输入
+            const lines = input.split('\n');
+            let addedCount = 0;
+            let existingCount = 0;
+            
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) return;
+                
+                // 解析格式：名称 ID
+                const lastSpaceIndex = trimmedLine.lastIndexOf(' ');
+                if (lastSpaceIndex === -1) return;
+                
+                const name = trimmedLine.substring(0, lastSpaceIndex).trim();
+                const id = trimmedLine.substring(lastSpaceIndex + 1).trim();
+                
+                if (name && id) {
+                    // 检查vid长度不超过50个字符
+                    if (id.length > 50) {
+                        existingCount++; // 跳过超过长度限制的视频
+                        return;
+                    }
+                    
+                    if (!author.videos.some(video => video.id === id)) {
+                        author.videos.push({ id, name });
+                        addedCount++;
+                    } else {
+                        existingCount++;
+                    }
+                }
+            });
+            
+            if (addedCount === 0) {
+                batchImportBtn.disabled = false;
+                batchImportBtn.innerHTML = originalText;
+                showNotification('没有新视频可以添加', 'error');
+                return;
+            }
+            
+            // 保存数据到服务器
+            saveVideoData()
+                .then(() => {
+                    // 清空输入框
+                    document.getElementById('batchInput').value = '';
+                    
+                    updateDataView();
+                    let message = `成功添加 ${addedCount} 个视频`;
+                    if (existingCount > 0) {
+                        message += `，跳过 ${existingCount} 个已存在的视频`;
+                    }
+                    showNotification(message);
+                })
+                .catch(error => {
+                    console.error('批量导入失败:', error);
+                    showNotification('导入失败', 'error');
+                })
+                .finally(() => {
+                    batchImportBtn.disabled = false;
+                    batchImportBtn.innerHTML = originalText;
+                });
+        }
+        
+        // 保存视频数据到服务器
+        function saveVideoData() {
+            return fetch('/api/video-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(videoData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('保存失败');
+                }
+                return response.json();
+            });
+        }
+        
+        // 更新作者下拉框
+        function updateAuthorSelect(categoryId, authorSelectId) {
+            const authorSelect = document.getElementById(authorSelectId);
+            
+            // 添加空值检查，确保authorSelect元素存在
+            if (!authorSelect) {
+                return;
+            }
+            
+            authorSelect.innerHTML = '<option value="">-- 请选择作者 --</option>';
+            
+            if (!categoryId) return;
+            
+            const category = videoData.categories.find(cat => cat.id === categoryId);
+            if (category) {
+                category.authors.forEach(author => {
+                    const option = document.createElement('option');
+                    option.value = author.id;
+                    option.textContent = author.name;
+                    authorSelect.appendChild(option);
+                });
+            }
+        }
+        
+        // 更新所有下拉框
+        function updateSelects() {
+            // 更新分类下拉框
+            const categoryOptions = '<option value="">-- 请选择分类 --</option>' + 
+                videoData.categories.map(category => 
+                    `<option value="${category.id}">${category.name}</option>`
+                ).join('');
+            
+            document.querySelectorAll('select[id$="Category"]').forEach(select => {
+                if (select) { // 添加空值检查
+                    select.innerHTML = categoryOptions;
+                }
+            });
+            
+            // 更新作者下拉框
+            document.querySelectorAll('select[id$="Category"]').forEach(select => {
+                if (select) { // 添加空值检查
+                    const authorSelectId = select.id.replace('Category', 'Author');
+                    updateAuthorSelect(select.value, authorSelectId);
+                }
+            });
+        }
+        
+        // 更新数据视图
+        function updateDataView() {
+            const dataView = document.getElementById('dataView');
+            
+            // 添加空值检查，确保dataView元素存在
+            if (!dataView) {
+                console.error('dataView元素未找到');
+                return;
+            }
+            
+            if (!videoData.categories || videoData.categories.length === 0) {
+                dataView.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">暂无数据</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            videoData.categories.forEach(category => {
+                html += `<div class="category-item">
+                    <strong>${category.name}</strong> (${category.id})
+                </div>`;
+                
+                category.authors.forEach(author => {
+                    html += `<div class="author-item">
+                        <strong>${author.name}</strong> (${author.id}) - ${author.videos.length} 个视频
+                    </div>`;
+                    
+                    // 只显示前10个视频
+                    const showVideos = author.videos.slice(0, 10);
+                    showVideos.forEach(video => {
+                        html += `<div class="video-item">
+                            ${video.name} (${video.id})
+                        </div>`;
+                    });
+                    
+                    if (author.videos.length > 10) {
+                        html += `<div class="video-item" style="color: var(--text-secondary); font-style: italic;">
+                            ... 还有 ${author.videos.length - 10} 个视频
+                        </div>`;
+                    }
+                });
+            });
+            
+            dataView.innerHTML = html;
+        }
+        
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            
+            // 添加空值检查，确保notification元素存在
+            if (!notification) {
+                console.error('notification元素未找到');
+                return;
+            }
+            
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 添加分类
+        function addCategory() {
+            const categoryName = document.getElementById('newCategoryName').value.trim();
+            const categoryId = document.getElementById('newCategoryId').value.trim();
+            
+            if (!categoryName || !categoryId) {
+                showNotification('请填写分类名称和分类ID', 'error');
+                return;
+            }
+            
+            const addCategoryBtn = document.getElementById('addCategoryBtn');
+            const originalText = addCategoryBtn.innerHTML;
+            addCategoryBtn.disabled = true;
+            addCategoryBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 添加中...';
+            
+            // 检查分类ID是否已存在
+            if (videoData.categories.some(category => category.id === categoryId)) {
+                addCategoryBtn.disabled = false;
+                addCategoryBtn.innerHTML = originalText;
+                showNotification('分类ID已存在', 'error');
+                return;
+            }
+            
+            // 发送请求到服务器
+            fetch('/api/categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: categoryName, id: categoryId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新本地数据
+                    videoData.categories.push({ 
+                        id: categoryId, 
+                        name: categoryName, 
+                        authors: [] 
+                    });
+                    
+                    // 更新所有分类下拉框
+                    updateSelects();
+                    
+                    // 清空输入框
+                    document.getElementById('newCategoryName').value = '';
+                    document.getElementById('newCategoryId').value = '';
+                    
+                    showNotification('分类添加成功');
+                } else {
+                    showNotification(data.error || '添加失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('添加分类失败:', error);
+                showNotification('添加失败', 'error');
+            })
+            .finally(() => {
+                addCategoryBtn.disabled = false;
+                addCategoryBtn.innerHTML = originalText;
+            });
+        }
+        
+        // 添加作者
+        function addAuthor() {
+            const categoryId = document.getElementById('authorCategory').value;
+            const authorName = document.getElementById('newAuthorName').value.trim();
+            const authorId = document.getElementById('newAuthorId').value.trim();
+            
+            if (!categoryId || !authorName || !authorId) {
+                showNotification('请选择分类并填写作者名称和作者ID', 'error');
+                return;
+            }
+            
+            const addAuthorBtn = document.getElementById('addAuthorBtn');
+            const originalText = addAuthorBtn.innerHTML;
+            addAuthorBtn.disabled = true;
+            addAuthorBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 添加中...';
+            
+            // 找到分类
+            const category = videoData.categories.find(cat => cat.id === categoryId);
+            
+            // 检查作者ID是否已存在
+            if (category.authors.some(author => author.id === authorId)) {
+                addAuthorBtn.disabled = false;
+                addAuthorBtn.innerHTML = originalText;
+                showNotification('该分类下的作者ID已存在', 'error');
+                return;
+            }
+            
+            // 发送请求到服务器
+            fetch('/api/authors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ categoryId, name: authorName, id: authorId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新本地数据
+                    category.authors.push({ 
+                        id: authorId, 
+                        name: authorName, 
+                        videos: [] 
+                    });
+                    
+                    // 更新所有作者下拉框
+                    updateSelects();
+                    
+                    // 清空输入框
+                    document.getElementById('newAuthorName').value = '';
+                    document.getElementById('newAuthorId').value = '';
+                    
+                    showNotification('作者添加成功');
+                } else {
+                    showNotification(data.error || '添加失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('添加作者失败:', error);
+                showNotification('添加失败', 'error');
+            })
+            .finally(() => {
+                addAuthorBtn.disabled = false;
+                addAuthorBtn.innerHTML = originalText;
+            });
+        }
+        
+        // 更新视频下拉框
+        function updateVideoSelect(authorId, videoSelectId) {
+            const videoSelect = document.getElementById(videoSelectId);
+            if (!videoSelect) return;
+            
+            videoSelect.innerHTML = '<option value="">-- 请选择视频 --</option>';
+            
+            if (!authorId) return;
+            
+            // 找到作者
+            let author = null;
+            for (const category of videoData.categories) {
+                author = category.authors.find(auth => auth.id === authorId);
+                if (author) break;
+            }
+            
+            if (author) {
+                author.videos.forEach(video => {
+                    const option = document.createElement('option');
+                    option.value = video.id;
+                    option.textContent = video.name;
+                    videoSelect.appendChild(option);
+                });
+            }
+        }
+        
+        // 删除视频
+        function deleteVideo() {
+            const categoryId = document.getElementById('delVideoCategory').value;
+            const authorId = document.getElementById('delVideoAuthor').value;
+            const videoId = document.getElementById('delVideo').value;
+            
+            if (!categoryId || !authorId || !videoId) {
+                showNotification('请选择分类、作者和视频', 'error');
+                return;
+            }
+            
+            const deleteVideoBtn = document.getElementById('deleteVideoBtn');
+            const originalText = deleteVideoBtn.innerHTML;
+            deleteVideoBtn.disabled = true;
+            deleteVideoBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 删除中...';
+            
+            // 发送请求到服务器
+            fetch('/api/video-data', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    type: 'video', 
+                    categoryId, 
+                    authorId, 
+                    videoId 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新本地数据
+                    const category = videoData.categories.find(cat => cat.id === categoryId);
+                    const author = category.authors.find(auth => auth.id === authorId);
+                    const videoIndex = author.videos.findIndex(vid => vid.id === videoId);
+                    if (videoIndex !== -1) {
+                        author.videos.splice(videoIndex, 1);
+                    }
+                    
+                    // 更新视频下拉框
+                    updateVideoSelect(authorId, 'delVideo');
+                    
+                    // 更新数据视图
+                    updateDataView();
+                    
+                    showNotification('视频删除成功');
+                } else {
+                    showNotification(data.error || '删除失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('删除视频失败:', error);
+                showNotification('删除失败', 'error');
+            })
+            .finally(() => {
+                deleteVideoBtn.disabled = false;
+                deleteVideoBtn.innerHTML = originalText;
+            });
+        }
+        
+        // 删除作者
+        function deleteAuthor() {
+            const categoryId = document.getElementById('delAuthorCategory').value;
+            const authorId = document.getElementById('delAuthor').value;
+            
+            if (!categoryId || !authorId) {
+                showNotification('请选择分类和作者', 'error');
+                return;
+            }
+            
+            const deleteAuthorBtn = document.getElementById('deleteAuthorBtn');
+            const originalText = deleteAuthorBtn.innerHTML;
+            deleteAuthorBtn.disabled = true;
+            deleteAuthorBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 删除中...';
+            
+            // 发送请求到服务器
+            fetch('/api/video-data', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    type: 'author', 
+                    categoryId, 
+                    authorId 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新本地数据
+                    const category = videoData.categories.find(cat => cat.id === categoryId);
+                    const authorIndex = category.authors.findIndex(auth => auth.id === authorId);
+                    if (authorIndex !== -1) {
+                        category.authors.splice(authorIndex, 1);
+                    }
+                    
+                    // 更新作者下拉框
+                    updateAuthorSelect(categoryId, 'delAuthor');
+                    
+                    // 更新数据视图
+                    updateDataView();
+                    
+                    showNotification('作者及其所有视频删除成功');
+                } else {
+                    showNotification(data.error || '删除失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('删除作者失败:', error);
+                showNotification('删除失败', 'error');
+            })
+            .finally(() => {
+                deleteAuthorBtn.disabled = false;
+                deleteAuthorBtn.innerHTML = originalText;
+            });
+        }
+        
+        // 删除分类
+        function deleteCategory() {
+            const categoryId = document.getElementById('delCategory').value;
+            
+            if (!categoryId) {
+                showNotification('请选择分类', 'error');
+                return;
+            }
+            
+            const deleteCategoryBtn = document.getElementById('deleteCategoryBtn');
+            const originalText = deleteCategoryBtn.innerHTML;
+            deleteCategoryBtn.disabled = true;
+            deleteCategoryBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 删除中...';
+            
+            // 发送请求到服务器
+            fetch('/api/video-data', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    type: 'category', 
+                    categoryId 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 更新本地数据
+                    const categoryIndex = videoData.categories.findIndex(cat => cat.id === categoryId);
+                    if (categoryIndex !== -1) {
+                        videoData.categories.splice(categoryIndex, 1);
+                    }
+                    
+                    // 更新所有分类下拉框
+                    updateSelects();
+                    
+                    // 更新数据视图
+                    updateDataView();
+                    
+                    showNotification('分类及其所有内容删除成功');
+                } else {
+                    showNotification(data.error || '删除失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('删除分类失败:', error);
+                showNotification('删除失败', 'error');
+            })
+            .finally(() => {
+                deleteCategoryBtn.disabled = false;
+                deleteCategoryBtn.innerHTML = originalText;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>密钥管理 - 腾讯视频链接生成器</title>
+    <style>
+        /* 复用主页面的样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #66a1c2;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #343a40;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.16);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e9ecef, #ced4da, #adb5bd);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .container:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: calc(var(--border-radius) - 2px);
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        h1 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: var(--light-gray);
+        }
+        
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15);
+            background-color: white;
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #6d28d9;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #f3e8ff;
+            border: 1px solid #e9d5ff;
+            border-radius: var(--border-radius);
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .error.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+        
+        .success {
+            color: var(--secondary-color);
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: var(--border-radius);
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .success.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .section h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .key-list {
+            margin-top: 20px;
+        }
+        
+        .key-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+        }
+        
+        .key-item:hover {
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .key-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .key-value {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        
+        .key-type {
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            background-color: var(--light-gray);
+            align-self: flex-start;
+        }
+        
+        .key-type.admin {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .key-type.user {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+            width: auto;
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .loading-dots {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 0 4px;
+            animation: pulse 1.4s infinite ease-in-out;
+        }
+        
+        .loading-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 30px;
+            font-style: italic;
+            font-size: 16px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid var(--medium-gray);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .key-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .delete-btn {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">返回主页面</a>
+        <h1>密钥管理</h1>
+        <p class="subtitle">管理员可在此添加或删除密钥</p>
+        
+        <div class="error" id="errorMsg"></div>
+        <div class="success" id="successMsg"></div>
+        
+        <!-- 添加密钥表单 -->
+        <div class="section">
+            <h2>添加新密钥</h2>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="newKey">密钥值</label>
+                    <input type="text" id="newKey" placeholder="例如：KEY011">
+                </div>
+                <div class="input-group">
+                    <label for="keyType">密钥类型</label>
+                    <select id="keyType">
+                        <option value="user">普通用户</option>
+                        <option value="admin">管理员</option>
+                    </select>
+                </div>
+            </div>
+            <button id="addKeyBtn">添加密钥</button>
+        </div>
+        
+        <!-- 密钥列表 -->
+        <div class="section">
+            <h2>密钥列表</h2>
+            <div id="keyList" class="key-list">
+                <div class="loading-dots"><span></span><span></span><span></span></div> 加载密钥中...
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>腾讯视频链接生成器 - by老鼠鼠66</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面加载时检查用户是否为管理员
+            checkAdminStatus();
+            
+            const addKeyBtn = document.getElementById('addKeyBtn');
+            const newKeyInput = document.getElementById('newKey');
+            const keyTypeSelect = document.getElementById('keyType');
+            const keyList = document.getElementById('keyList');
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+            
+            // 加载密钥列表
+            loadKeys();
+            
+            // 添加密钥按钮点击事件
+            addKeyBtn.addEventListener('click', function() {
+                const key = newKeyInput.value.trim();
+                const type = keyTypeSelect.value;
+                
+                if (!key) {
+                    showError('请输入密钥值');
+                    return;
+                }
+                
+                addKeyBtn.disabled = true;
+                addKeyBtn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 添加中...';
+                
+                fetch('/api/keys', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ key, type })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess('密钥添加成功');
+                        newKeyInput.value = '';
+                        loadKeys();
+                    } else {
+                        showError(data.error || '添加失败');
+                    }
+                })
+                .catch(error => {
+                    showError('添加失败，请稍后重试');
+                    console.error('添加密钥错误:', error);
+                })
+                .finally(() => {
+                    addKeyBtn.disabled = false;
+                    addKeyBtn.innerHTML = '添加密钥';
+                });
+            });
+            
+            // 加载密钥列表
+            function loadKeys() {
+                keyList.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div> 加载密钥中...';
+                
+                fetch('/api/keys')
+                .then(response => {
+                    if (response.status === 403) {
+                        window.location.href = 'index.html';
+                        return Promise.reject('权限不足');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.keys && data.keys.length > 0) {
+                        renderKeyList(data.keys);
+                    } else {
+                        keyList.innerHTML = '<div class="empty-message">暂无密钥</div>';
+                    }
+                })
+                .catch(error => {
+                    if (error !== '权限不足') {
+                        showError('加载密钥失败');
+                        console.error('加载密钥错误:', error);
+                    }
+                });
+            }
+            
+            // 渲染密钥列表
+            function renderKeyList(keys) {
+                let html = '';
+                
+                keys.forEach(key => {
+                    html += `
+                        <div class="key-item">
+                            <div class="key-info">
+                                <div class="key-value">${key.key}</div>
+                                <div class="key-type ${key.type}">${key.type === 'admin' ? '管理员' : '普通用户'}</div>
+                            </div>
+                            <button class="delete-btn" onclick="deleteKey('${key.key}')">删除</button>
+                        </div>
+                    `;
+                });
+                
+                keyList.innerHTML = html;
+            }
+            
+            // 删除密钥
+            window.deleteKey = function(key) {
+                if (!confirm(`确定要删除密钥 ${key} 吗？`)) {
+                    return;
+                }
+                
+                fetch(`/api/keys/${key}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess('密钥删除成功');
+                        loadKeys();
+                    } else {
+                        showError(data.error || '删除失败');
+                    }
+                })
+                .catch(error => {
+                    showError('删除失败，请稍后重试');
+                    console.error('删除密钥错误:', error);
+                });
+            }
+            
+            // 检查用户是否为管理员
+            function checkAdminStatus() {
+                fetch('/api/check-auth')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.authenticated || data.userType !== 'admin') {
+                        // 不是管理员，重定向到主页面
+                        window.location.href = 'index.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('检查认证状态错误:', error);
+                    window.location.href = 'index.html';
+                });
+            }
+            
+            // 显示错误消息
+            function showError(message) {
+                errorMsg.textContent = message;
+                successMsg.classList.remove('show');
+                successMsg.style.display = 'none';
+                errorMsg.classList.remove('show');
+                
+                errorMsg.style.display = 'block';
+                setTimeout(() => {
+                    errorMsg.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    errorMsg.classList.remove('show');
+                    errorMsg.style.display = 'none';
+                }, 5000);
+            }
+            
+            // 显示成功消息
+            function showSuccess(message) {
+                successMsg.textContent = message;
+                errorMsg.classList.remove('show');
+                errorMsg.style.display = 'none';
+                successMsg.classList.remove('show');
+                
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                    successMsg.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 按Enter键添加密钥
+            newKeyInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addKeyBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
